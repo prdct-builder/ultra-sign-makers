@@ -93,6 +93,8 @@ Put images in `sites/<id>/assets/` and reference them with `asset('products/led.
 
 ## Adding a new website
 
+> **Full step-by-step guide:** [docs/ADDING-A-WEBSITE.md](docs/ADDING-A-WEBSITE.md). It covers every file, section reference, deployment, troubleshooting and a checklist. The short version:
+
 1. **Create the folder.** Copy an existing site folder to `src/sites/<new-id>/`. The folder name is the site id: lowercase-kebab-case, e.g. `brand-b`.
 2. **Edit `site.ts`.** Set `id` (must equal the folder name), `name`, `domains`, `url` (empty until live), `seo` and `features`. Keep this file free of Vue and image imports, because it's read at build time.
 3. **Edit `theme.ts`.** Set the brand palette, light and dark semantic colours, fonts (with the Google Fonts URL in `stylesheet`) and effects.
@@ -107,7 +109,11 @@ Registration is automatic: any folder in `src/sites/` with a `site.ts` is a site
 
 **When to change the platform instead:** if a new site needs a section that other sites could reuse, add it to `platform/components/sections/` and register it in `platform/sections.ts` and `SectionConfig` in `platform/site/types.ts`. If only that site needs it, keep it in the site's `components/` folder.
 
-## Deployment (Firebase Hosting)
+## Deployment
+
+Each site is hosted on its own, so different sites can use different providers, accounts and domains. Any static host works as long as it serves `index.html` for unknown paths. [docs/ADDING-A-WEBSITE.md → Part 6](docs/ADDING-A-WEBSITE.md#part-6--build-and-deploy) has step-by-step instructions for Firebase, Netlify, Cloudflare Pages, Vercel and cPanel shared hosting.
+
+### Firebase Hosting
 
 `firebase.json` has one hosting target per site, each serving `dist/<site-id>` with a rewrite to `index.html`. That rewrite is needed for clean URLs like `/contact`. Targets aren't linked to Firebase projects yet, so `firebase deploy` stops instead of deploying anywhere. To set up a site:
 
