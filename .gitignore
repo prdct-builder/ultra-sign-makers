@@ -30,7 +30,9 @@ coverage
 # Claude Code local settings
 .claude/settings.local.json
 
-# Placeholder images kept locally only — not committed until real Ultra Sign Makers photos are added
-public/*
-!public/cover_pic.webp
-!public/favicon.svg
+# Old root public/ folder (unused — each site has src/sites/<id>/public); leftover local images stay out of git
+/public/
+
+# ZMR Fabrications photos are kept locally only (not committed); the site shows placeholders without them
+src/sites/zmr-fabrications/assets/
+src/sites/zmr-fabrications/public/og-image.png

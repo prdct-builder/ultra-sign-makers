@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* All colours below are design tokens set per site — see src/platform/theme/themeToCss.ts. */
+  body {
+    @apply font-sans transition-colors duration-300;
+    background-color: var(--color-page);
+    color: var(--color-fg);
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+    color: var(--color-heading);
+  }
+
+  ::selection {
+    background-color: var(--selection);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .container-site {
+    @apply mx-auto w-full max-w-site px-6 sm:px-8 lg:px-10;
+  }
+
+  .section-padding {
+    @apply py-12;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-semibold;
+    color: var(--eyebrow-fg);
+    background-color: var(--eyebrow-bg);
+    border-color: var(--eyebrow-line);
+  }
+
+  .heading-xl {
+    @apply text-4xl sm:text-5xl lg:text-5xl font-bold leading-[1.08];
+  }
+
+  .heading-lg {
+    @apply text-3xl sm:text-4xl font-bold leading-tight;
+  }
+
+  .text-muted {
+    color: var(--color-muted);
+  }
+
+  .card-surface {
+    @apply rounded-2xl border shadow-soft;
+    background-color: var(--color-surface);
+    border-color: var(--color-surface-line);
+  }
+
+  .glass {
+    @apply backdrop-blur-xl;
+    background-color: var(--color-glass);
+  }
+
+  .gradient-text {
+    background-image: var(--highlight);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+}
+
+@layer utilities {
+  .reveal {
+    opacity: 0;
+  }
+
+  .reveal-up {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+
+  .reveal-scale {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  .reveal.is-visible {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+
+  .reveal-up.is-visible {
+    animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .reveal-scale.is-visible {
+    animation: scaleIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scaleIn {
+    from { opacity: 0; transform: scale(0.92); }
+    to { opacity: 1; transform: scale(1); }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal,
+  .reveal-up,
+  .reveal-scale {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply rounded-full;
+  background-color: var(--scrollbar);
+}

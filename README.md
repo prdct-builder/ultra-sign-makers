@@ -1,77 +1,129 @@
-# Ultra Sign Makers
+# Multi-site business website platform
 
-Business website for Ultra Sign Makers, a signage manufacturing and visual branding company — custom signboards, LED signage, 3D acrylic letters, ACP elevations and in-shop branding. Single-page marketing site — no backend, no client-side routing, no state library.
+One Vue 3 + Vite + Tailwind codebase that builds several independent business websites. Each site has its own branding, theme, content, images, navigation and page layout. Shared components never contain a brand's text or colours.
 
-## Tech Stack
+Sites in this repo:
 
-- **Vue 3** (Composition API, `<script setup>`)
-- **Vite** — dev server and build tooling
-- **Tailwind CSS** — utility-first styling, custom `primary`/`accent`/`steel` palette in `tailwind.config.js`
-- **@lucide/vue** — icons
+| Site | Folder | Dev URL |
+|---|---|---|
+| Ultra Sign Makers | `src/sites/ultra-sign-makers` | http://localhost:3000/ultra-sign-makers/ (also `/`) |
+| ZMR Fabrications | `src/sites/zmr-fabrications` | http://localhost:3000/zmr-fabrications/ |
 
-## Prerequisites
-
-- Node.js 18+ and npm
-
-## Development
+## Commands
 
 ```bash
 npm install
-npm run dev
-```
-
-The app runs at `http://localhost:3000`.
-
-## Build for Production
-
-```bash
-npm run build      # outputs to dist/
-npm run preview    # serve the production build locally
-```
-
-## Linting
-
-```bash
+npm run dev                         # all sites; / shows the default site, /<site-id>/ any site
+npm run dev -- zmr-fabrications     # make another site the default at /
+npm run build                       # every site → dist/<site-id>/
+npm run build -- ultra-sign-makers  # one site
+npm run preview -- ultra-sign-makers
+npm test                            # validates every site config + platform tests
+npm run typecheck
 npm run lint
+npm run check                       # typecheck + lint + test + build, run before committing
 ```
 
-## Project Structure
+Requires Node.js 18+.
+
+## How it fits together
 
 ```
-vue-app/
-├── index.html                # HTML shell, fonts, theme-init script
-├── public/                   # Static assets served as-is (logos, product/gallery photos)
-├── src/
-│   ├── main.js                # App entry point
-│   ├── App.vue                 # Root layout — assembles all page sections
-│   ├── assets/main.css          # Tailwind entrypoint + shared component classes
-│   ├── components/
-│   │   ├── layout/              # Navbar, Footer, ScrollProgress, BackToTop
-│   │   ├── sections/             # One component per page section (Hero, About, Products, ...)
-│   │   └── ui/                    # Reusable primitives (BaseButton, BaseCard, Accordion, Counter)
-│   ├── composables/               # useDarkMode, useScrollY, useScrollReveal, useSectionRouter, useCounter
-│   └── data/                       # index.js — all page content/config, grouped by section
+src/
+  main.ts                    entry: mounts the active site
+  platform/                  shared core (no brand content)
+    boot.ts                  resolve site → validate → theme → router → mount
+    App.vue                  layout shell (navbar, page, footer)
+    router.ts                vue-router built from a site's pages
+    sections.ts              section registry: type → component, anchor, empty-check
+    assets.ts                per-site image lookup with placeholder fallback
+    site/                    types, validation, resolver, useSite()
+    theme/                   theme types, tokens → CSS variables
+    components/{layout,sections,ui}/
+    composables/             dark mode, scroll spy, reveal, SEO, counters
+    styles/main.css          base styles; all colours are CSS variables
+  sites/<site-id>/
+    site.ts                  name, domains, URL, SEO, theme, feature flags (read at build time)
+    theme.ts                 colours (light + dark), fonts, effects
+    index.ts                 full site: brand, contact, navigation, pages
+    contact.ts, navigation.ts
+    content/*.ts             section content
+    assets/                  images, bundled and fingerprinted by Vite
+    public/                  copied as-is: favicon.svg, og-image, robots.txt
+    components/              optional site-only components
+build/multi-site.ts          Vite plugin: site discovery, index.html head, dev routing
+scripts/site.mjs             dev/build/preview for one or all sites
+tests/                       Vitest
 ```
 
-## Content & Configuration
+### Choosing the site
 
-All business content — copy, phone numbers, address, image paths, headings — lives in `src/data/index.js` (one section per block), not in the components. To update site content (e.g. a new product, a changed phone number), edit `src/data/index.js` rather than the `.vue` files. Section components are purely presentational and import their content from there.
+- **Production:** one build per site. `npm run build` produces `dist/<site-id>/`, and each build contains only that site's code, content and images. At build time the plugin writes the title, description, canonical URL, Open Graph tags, favicon, theme CSS and fonts into `index.html`, so link previews and crawlers see the right site without running JavaScript.
+- **Development:** every site is served at once. `/<site-id>/…` selects a site by path, and `/` shows the default site.
+- **Resolution order** (`src/platform/site/resolve.ts`): path prefix (dev only) → domain (`site.ts` → `domains`) → the build's site. An unknown site in development shows a page listing the valid sites.
 
-## Navigation
+### Theme
 
-The site is a single scrolling page with no router. `src/composables/useSectionRouter.js` intercepts in-page anchor clicks, smooth-scrolls to the target section, and syncs the URL to a clean path (`/contact`) via the History API — so it behaves like a multi-page site without actually being one. Because of this, any static host must be configured to fall back to `index.html` for unmatched paths so that direct loads of `/contact` etc. don't 404. `firebase.json` already has this rewrite configured (`"source": "**" → "/index.html"`).
+`theme.ts` defines colour scales (`primary`, `accent`, `neutral`, `steel`, `ink`), semantic colours for light and dark mode (page, text, surfaces, eyebrow, highlight …), fonts and effects (progress bar, hero glow, card hover). `themeToCss` turns these into CSS variables scoped to `:root[data-site="<id>"]`, so one site's theme can never apply to another.
 
-## Dark Mode
+Tailwind classes such as `bg-primary-600`, `text-slate-600` and `border-line` read those variables. Components therefore use normal Tailwind classes and never hardcode brand colours.
 
-Theme state is managed by `src/composables/useDarkMode.js` (class-based, persisted to `localStorage` under `usm-color-scheme`, defaults to OS preference). An inline script in `index.html` applies the `dark` class before Vue mounts to avoid a flash of the wrong theme on load.
+### Pages and sections
 
-## Deployment
+A page is a list of sections:
 
-Hosted on **Firebase Hosting**. Deploys are automated via GitHub Actions (`.github/workflows/`):
+```ts
+{ path: '/', sections: [
+  { type: 'hero', variant: 'centered', decor: 'blobs', content: hero },
+  { type: 'products', content: products },
+  { type: 'custom', component: 'OnCallBand', props: { heading: '…', text: '…' } },
+] }
+```
 
-- `firebase-hosting-merge.yml` — builds and deploys to the live channel on every push to `main`.
-- `firebase-hosting-pull-request.yml` — builds a preview channel for each pull request.
+- **Built-in types:** `hero` (variants `split` and `centered`), `about`, `products`, `stats`, `whyUs`, `gallery`, `reviews`, `faq`, `contact`.
+- **Order:** sections appear in whatever order you list them.
+- **Empty sections:** a section with nothing to show (e.g. `reviews` with no items) is left out, along with its nav links.
+- **Clean URLs:** home-page sections get clean URLs (`/about`, `/contact`), and the address bar follows your scroll position.
+- **Extra pages:** add `{ path: '/services', title: 'Services', sections: [...] }`, or `{ path: '/x', component: 'MyPage' }` for a fully custom page.
+- **Site-only components:** go in `sites/<id>/components/` and are registered under `components` in the site's `index.ts`.
 
-To deploy manually: `npm run build && firebase deploy` (requires the Firebase CLI and access to the project set in `.firebaserc`).
+### Images
 
-> TODO: `.firebaserc` and the workflows still point at the old `zmr-fabrications` project — switch them to the Ultra Sign Makers Firebase project before deploying.
+Put images in `sites/<id>/assets/` and reference them with `asset('products/led.webp')`. A missing file returns `undefined`, and the component shows a labelled placeholder, so a site works before its photos arrive. Files in `sites/<id>/public/` keep their exact names; use this for `favicon.svg` and the social preview image (`seo.ogImage`).
+
+## Adding a new website
+
+1. **Create the folder.** Copy an existing site folder to `src/sites/<new-id>/`. The folder name is the site id: lowercase-kebab-case, e.g. `brand-b`.
+2. **Edit `site.ts`.** Set `id` (must equal the folder name), `name`, `domains`, `url` (empty until live), `seo` and `features`. Keep this file free of Vue and image imports, because it's read at build time.
+3. **Edit `theme.ts`.** Set the brand palette, light and dark semantic colours, fonts (with the Google Fonts URL in `stylesheet`) and effects.
+4. **Add assets.** Put the logo and photos in `assets/`, and `favicon.svg` (plus `og-image.png` if you have a URL) in `public/`.
+5. **Fill in content.** Update `contact.ts`, `navigation.ts` and `content/*.ts`.
+6. **Compose pages.** In `index.ts`, list the sections, choose variants, and register any `components` the site needs.
+7. **Check it.** Run `npm test`, which validates the new site's config and links, then `npm run dev` and open `http://localhost:3000/<new-id>/`.
+8. **Build it.** Run `npm run build -- <new-id>` to produce `dist/<new-id>/`.
+9. **Deploy it.** See Deployment below.
+
+Registration is automatic: any folder in `src/sites/` with a `site.ts` is a site. You don't need to change shared components or routing.
+
+**When to change the platform instead:** if a new site needs a section that other sites could reuse, add it to `platform/components/sections/` and register it in `platform/sections.ts` and `SectionConfig` in `platform/site/types.ts`. If only that site needs it, keep it in the site's `components/` folder.
+
+## Deployment (Firebase Hosting)
+
+`firebase.json` has one hosting target per site, each serving `dist/<site-id>` with a rewrite to `index.html`. That rewrite is needed for clean URLs like `/contact`. Targets aren't linked to Firebase projects yet, so `firebase deploy` stops instead of deploying anywhere. To set up a site:
+
+```bash
+firebase use --add                                         # pick the site's Firebase project
+firebase target:apply hosting <site-id> <firebase-site-name>
+npm run build -- <site-id>
+firebase deploy --only hosting:<site-id>
+```
+
+Then add the custom domain in the Firebase console, add it to `domains` in `site.ts`, and set `url`.
+
+> `.firebaserc` still names the old `zmr-fabrications` project as the default. Check which project you're deploying to before running any deploy.
+
+## Notes
+
+- **Single-page app:** content renders in the browser. The `<head>` tags are static per site, so search engines and link previews get correct titles and descriptions. If you later need full server-rendered pages, the resolver and `useSite()` already avoid shared module state.
+- **Dark mode:** each site stores its choice under `<site-id>-color-scheme`. Set `features.darkMode: false` to force light mode.
+- **Git:** ZMR Fabrications' photos (`src/sites/zmr-fabrications/assets/`) are kept out of git, so a fresh clone shows placeholders for them.
