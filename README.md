@@ -1,4 +1,6 @@
-# Multi-site business website platform
+# website-builder
+
+Multi-site business website platform.
 
 One Vue 3 + Vite + Tailwind codebase that builds several independent business websites. Each site has its own branding, theme, content, images, navigation and page layout. Shared components never contain a brand's text or colours.
 
