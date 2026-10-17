@@ -1,6 +1,6 @@
 <script setup>
 import { useSectionRouter } from './composables/useSectionRouter'
-import { showGallery, showReviews } from './data'
+import { showReviews } from './data'
 import Navbar from './components/layout/Navbar.vue'
 import Footer from './components/layout/Footer.vue'
 import ScrollProgress from './components/layout/ScrollProgress.vue'
@@ -28,7 +28,7 @@ useSectionRouter()
     <Products />
     <WhyChooseUs />
     <Stats />
-    <Gallery v-if="showGallery" />
+    <Gallery />
     <Reviews v-if="showReviews" />
     <FAQ />
     <Contact />

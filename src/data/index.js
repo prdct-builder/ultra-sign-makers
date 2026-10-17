@@ -5,7 +5,7 @@ import { Gem, Hammer, Clock, PencilRuler } from '@lucide/vue'
 export const site = {
   name: 'Ultra Sign Makers',
   url: '', // TODO: add the live website URL for Ultra Sign Makers
-  // Leave empty to show the site name as text instead of a logo image
+  // Leave empty to show a placeholder mark with the site name
   light_logo: '', // TODO: add Ultra Sign Makers logo (for light backgrounds)
   dark_logo: '', // TODO: add Ultra Sign Makers logo (for dark backgrounds)
   tagline:
@@ -95,7 +95,7 @@ export const about = {
     'Direct conversation with our team to understand your requirements'
   ],
   image: {
-    src: '', // TODO: add an Ultra Sign Makers photo — the image column is hidden while empty
+    src: '', // TODO: add an Ultra Sign Makers photo — a placeholder shows while empty
     alt: 'Ultra Sign Makers signage and branding showcase'
   },
   badge: { value: '10+', label: 'signage and branding solutions for businesses' }
@@ -110,7 +110,7 @@ export const productsContent = {
   headingAfter: ''
 }
 
-// Leave `image` empty to show the card without a photo.
+// Leave `image` empty to show a placeholder in the card.
 export const products = [
   {
     image: '',
@@ -181,7 +181,7 @@ export const whyChooseUsContent = {
   description:
     'From the first conversation to the finished signboard, we focus on craftsmanship, clear communication and signage that suits your brand and your space.',
   image: {
-    src: '', // TODO: add an Ultra Sign Makers photo — the image column is hidden while empty
+    src: '', // TODO: add an Ultra Sign Makers photo — a placeholder shows while empty
     alt: 'Ultra Sign Makers signage fabrication'
   }
 }
@@ -219,10 +219,8 @@ export const galleryContent = {
 }
 
 // Add Ultra Sign Makers photos in this shape: { src: '/gallery/...', alt: '...' }
+// Placeholder tiles show while this is empty.
 export const galleryItems = []
-
-// The Gallery section and its nav/footer links are hidden while there are no photos.
-export const showGallery = galleryItems.length > 0
 
 // ── Reviews ─────────────────────────────────────────────────────
 
@@ -242,8 +240,7 @@ export const testimonials = []
 export const showReviews = testimonials.length > 0
 
 // Used by the navbar and footer to drop links to hidden sections.
-export const isLinkVisible = (link) =>
-  (showReviews || link.href !== '#reviews') && (showGallery || link.href !== '#gallery')
+export const isLinkVisible = (link) => showReviews || link.href !== '#reviews'
 
 // ── FAQ ─────────────────────────────────────────────────────────
 

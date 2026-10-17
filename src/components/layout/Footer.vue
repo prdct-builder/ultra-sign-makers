@@ -17,7 +17,10 @@ const { isDark } = useDarkMode()
       <div>
         <a href="#home" class="inline-flex items-center rounded-xl">
           <img v-if="site.light_logo" :src="isDark ? site.dark_logo || site.light_logo : site.light_logo" :alt="site.name" class="h-24 w-auto" />
-          <span v-else class="font-display text-2xl font-bold">{{ site.name }}</span>
+          <span v-else class="flex items-center gap-3">
+            <img src="/favicon.svg" alt="" class="h-12 w-12" />
+            <span class="font-display text-2xl font-bold">{{ site.name }}</span>
+          </span>
         </a>
         <p class="mt-4 max-w-sm text-muted leading-relaxed">
           {{ site.tagline }}

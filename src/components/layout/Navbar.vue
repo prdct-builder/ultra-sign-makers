@@ -27,7 +27,10 @@ function closeMobile() {
     <nav class="container-site flex h-16 items-center justify-between sm:h-20" aria-label="Primary">
       <a href="#home" class="flex items-center rounded-xl">
         <img v-if="site.light_logo" :src="isDark ? site.dark_logo || site.light_logo : site.light_logo" :alt="site.name" class="h-16 w-auto sm:h-20" />
-        <span v-else class="font-display text-xl font-bold sm:text-2xl">{{ site.name }}</span>
+        <span v-else class="flex items-center gap-2.5">
+          <img src="/favicon.svg" alt="" class="h-9 w-9 sm:h-10 sm:w-10" />
+          <span class="font-display text-lg font-bold sm:text-xl">{{ site.name }}</span>
+        </span>
       </a>
 
       <ul class="hidden items-center gap-8 lg:flex">

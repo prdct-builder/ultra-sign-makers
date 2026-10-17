@@ -2,19 +2,22 @@
 import { CheckCircle2 } from '@lucide/vue'
 import { vReveal } from '../../composables/useScrollReveal'
 import { about } from '../../data'
+import ImagePlaceholder from '../ui/ImagePlaceholder.vue'
 </script>
 
 <template>
   <section id="about" class="section-padding scroll-mt-24">
-    <div class="container-site grid items-center gap-16" :class="about.image.src ? 'lg:grid-cols-2' : 'max-w-3xl'">
-      <div v-if="about.image.src" v-reveal class="relative order-2 lg:order-1">
+    <div class="container-site grid items-center gap-16 lg:grid-cols-2">
+      <div v-reveal class="relative order-2 lg:order-1">
         <div class="aspect-[9/7] overflow-hidden rounded-3xl border border-slate-200/70 shadow-soft-lg dark:border-white/10">
           <img
+            v-if="about.image.src"
             :src="about.image.src"
             :alt="about.image.alt"
             loading="lazy"
             class="h-full w-full object-cover"
           />
+          <ImagePlaceholder v-else :label="about.image.alt" />
         </div>
         <div class="absolute -bottom-8 -right-6 hidden max-w-[220px] rounded-2xl border border-slate-200/70 bg-white p-5 shadow-soft-lg dark:border-white/10 dark:bg-slate-900 sm:block">
           <p class="font-display text-3xl font-bold gradient-text">{{ about.badge.value }}</p>

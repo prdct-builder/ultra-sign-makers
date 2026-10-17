@@ -3,6 +3,12 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import { galleryItems, galleryContent } from '../../data'
 import { vReveal } from '../../composables/useScrollReveal'
+import ImagePlaceholder from '../ui/ImagePlaceholder.vue'
+
+const PLACEHOLDER_COUNT = 6
+const items = galleryItems.length
+  ? galleryItems
+  : Array.from({ length: PLACEHOLDER_COUNT }, () => ({ src: '', alt: 'Photo coming soon' }))
 
 const trackRef = ref(null)
 const active = ref(0)
@@ -78,8 +84,8 @@ onUnmounted(() => trackRef.value?.removeEventListener('scroll', onScroll))
           class="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth pb-2"
         >
           <div
-            v-for="(item, i) in galleryItems"
-            :key="item.src"
+            v-for="(item, i) in items"
+            :key="item.src || i"
             :data-index="i"
             class="shrink-0 basis-[78%] snap-center sm:basis-[46%] lg:basis-[31%]"
           >
@@ -92,11 +98,13 @@ onUnmounted(() => trackRef.value?.removeEventListener('scroll', onScroll))
               @click="goTo(i)"
             >
               <img
+                v-if="item.src"
                 :src="item.src"
                 :alt="item.alt"
                 loading="lazy"
                 class="h-full w-full object-cover"
               />
+              <ImagePlaceholder v-else :label="item.alt" />
             </button>
           </div>
         </div>

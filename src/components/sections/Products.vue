@@ -1,6 +1,7 @@
 <script setup>
 import { PhoneCall } from '@lucide/vue'
 import BaseCard from '../ui/BaseCard.vue'
+import ImagePlaceholder from '../ui/ImagePlaceholder.vue'
 import { products, productsContent, primaryPhone } from '../../data'
 import { vReveal } from '../../composables/useScrollReveal'
 </script>
@@ -22,8 +23,9 @@ import { vReveal } from '../../composables/useScrollReveal'
           v-reveal="i * 90"
           :padded="false"
         >
-          <div v-if="product.image" class="aspect-[4/3] overflow-hidden bg-white dark:bg-slate-900">
+          <div class="aspect-[4/3] overflow-hidden bg-white dark:bg-slate-900">
             <img
+              v-if="product.image"
               :src="product.image"
               :alt="product.title"
               loading="lazy"
@@ -31,6 +33,7 @@ import { vReveal } from '../../composables/useScrollReveal'
               height="450"
               class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
+            <ImagePlaceholder v-else :label="product.title" />
           </div>
           <div class="p-8">
             <h3 class="text-lg font-semibold">{{ product.title }}</h3>
