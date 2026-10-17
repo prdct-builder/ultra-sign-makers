@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises } from '@vue/test-utils'
+import { replaceWithoutScroll } from '@/platform/router'
 import type { SiteConfig } from '@/platform/site/types'
 import { fixtureSite, mountSite, renderedSectionIds, sites } from './helpers'
 
@@ -61,6 +62,29 @@ describe('routing', () => {
     const hidden = await mountSite(sites['ultra-sign-makers'], '/reviews')
     expect(document.body.textContent).toContain('Page not found')
     hidden.wrapper.unmount()
+  })
+
+  it('never scrolls the page when the scroll spy updates the URL, even when updates overlap', async () => {
+    const { wrapper, router } = await mountSite(sites['ultra-sign-makers'])
+    // Let any scroll still pending from an earlier test (it waits up to 30 frames for its section) finish first.
+    await new Promise((r) => setTimeout(r, 600))
+    const scrollSpy = vi.spyOn(Element.prototype, 'scrollIntoView')
+    // Fast scrolling fires several URL updates before the first one finishes.
+    replaceWithoutScroll(router, '/about')
+    replaceWithoutScroll(router, '/products')
+    replaceWithoutScroll(router, '/faq')
+    await flushPromises()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(router.currentRoute.value.path).toBe('/faq')
+    expect(scrollSpy).not.toHaveBeenCalled()
+
+    // A real link navigation still scrolls to its section.
+    await router.push('/contact')
+    await flushPromises()
+    await new Promise((r) => setTimeout(r, 50))
+    expect(scrollSpy).toHaveBeenCalled()
+    scrollSpy.mockRestore()
+    wrapper.unmount()
   })
 
   it('supports extra pages built from different sections', async () => {

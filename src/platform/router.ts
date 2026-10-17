@@ -9,7 +9,6 @@ export function anchorToPath(anchor: string, homeAnchor: string | undefined): st
   return anchor === homeAnchor ? '/' : `/${anchor}`
 }
 
-let skipNextScroll = false
 let spyPausedUntil = 0
 
 /** True while a click-triggered smooth scroll is running, so the scroll spy doesn't rewrite the URL mid-way. */
@@ -17,13 +16,18 @@ export function isSpyPaused() {
   return Date.now() < spyPausedUntil
 }
 
-/** Update the URL without scrolling — used by the scroll spy as you scroll past sections. */
+/**
+ * Update the URL without scrolling — used by the scroll spy as you scroll past sections.
+ * The navigation itself is tagged (in history state) rather than using a shared flag, so
+ * overlapping updates while scrolling fast can never trigger a jump to a section.
+ */
 export function replaceWithoutScroll(router: Router, path: string) {
   if (router.currentRoute.value.path === path) return
-  skipNextScroll = true
-  router.replace(path).finally(() => {
-    skipNextScroll = false
-  })
+  router.replace({ path, state: { fromScrollSpy: true } }).catch(() => {})
+}
+
+function isScrollSpyNavigation(): boolean {
+  return typeof window !== 'undefined' && window.history.state?.fromScrollSpy === true
 }
 
 /** Elements appear after the first render, so wait a few frames for the target. */
@@ -71,8 +75,9 @@ export function createSiteRouter(site: SiteConfig, base: string): Router {
     history: createWebHistory(base),
     routes,
     scrollBehavior(to, from, saved) {
-      if (skipNextScroll) return false
+      // Back/forward restores where you were; scroll-spy URL updates never move the page.
       if (saved) return saved
+      if (isScrollSpyNavigation()) return false
       const section = to.params.section as string | undefined
       const firstLoad = from.matched.length === 0
       if (section) {
